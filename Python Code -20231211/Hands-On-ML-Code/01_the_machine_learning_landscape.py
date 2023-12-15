@@ -105,12 +105,17 @@ model.fit(X, y)
 # Make a prediction for Cyprus
 X_new = [[22587]]  # Cyprus' GDP per capita
 print(model.predict(X_new)) # outputs [[ 5.96242338]]
-#%%
-# this is a valdation cell to the addituon of one point to the 
-# data
+#%%----------------------------------------------------------
+# this is a vallation cell to the addition of one point to the data
 
-#adding the point to the data set
-country_stats.loc[len(country_stats.index)]= [22587, 5.96242338]
+#adding the point to the data set with condition
+if round(country_stats.iloc[-1]["Life satisfaction"],ndigits=3) == 5.962 :
+    pass
+else:
+    country_stats.loc[len(country_stats.index)]= [22587, 5.96242338]   
+
+#rename the last point to "banana"
+country_stats.rename(index={ 29: 'banana'} , inplace= True)
 
 # Visualize the data
 country_stats.plot(kind='scatter', x="GDP per capita", y='Life satisfaction')
@@ -123,6 +128,7 @@ plt.scatter(banana_point["GDP per capita"], banana_point["Life satisfaction"], c
 # Show the plot
 plt.show()
 
+#%%----------------------------------------------------------
 # %% [markdown]
 # Replacing the Linear Regression model with k-Nearest Neighbors (in this example, k = 3) regression in the previous code is as simple as replacing these two
 # lines:
