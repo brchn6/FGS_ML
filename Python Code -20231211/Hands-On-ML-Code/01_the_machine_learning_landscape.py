@@ -180,23 +180,6 @@ plt.scatter(melon_point["GDP per capita"], melon_point["Life satisfaction"], col
 # Show the plot
 plt.show()
 
-# %%
-
-
-# %%
-
-
-# %% [markdown]
-# # Note: you can ignore the rest of this notebook, it just generates many of the figures in chapter 1.
-
-# %%
-
-
-# %%
-
-
-# %%
-
 
 # %% [markdown]
 # Create a function to save the figures.
