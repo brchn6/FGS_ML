@@ -126,9 +126,8 @@ banana_point = country_stats.loc["banana"]
 plt.scatter(banana_point["GDP per capita"], banana_point["Life satisfaction"], color="red", label="banana")
 
 # Show the plot
-plt.show()
+# plt.show()
 
-#%%----------------------------------------------------------
 # %% [markdown]
 # Replacing the Linear Regression model with k-Nearest Neighbors (in this example, k = 3) regression in the previous code is as simple as replacing these two
 # lines:
@@ -158,7 +157,28 @@ print(model1.predict(X_new)) # outputs [[5.76666667]]
 
 
 # %%
+# this is a vallation cell to the addition of one point to the data
 
+#adding the point to the data set with condition
+if round(country_stats.iloc[-1]["Life satisfaction"],ndigits=3) == 5.767 :
+    pass
+else:
+    country_stats.loc[len(country_stats.index)]= [22587, 5.76666667]   
+
+#rename the last point to "melon"
+country_stats.rename(index={ 30: 'melon'} , inplace= True)
+
+# Visualize the data
+country_stats.plot(kind='scatter', x="GDP per capita", y='Life satisfaction')
+
+# Find the coordinates of the point with index "melon"
+melon_point = country_stats.loc["melon"]
+# Plot the "melon" point in red
+plt.scatter(banana_point["GDP per capita"], banana_point["Life satisfaction"], color="red", label="banana")
+plt.scatter(melon_point["GDP per capita"], melon_point["Life satisfaction"], color="green", label="melon")
+
+# Show the plot
+plt.show()
 
 # %%
 
