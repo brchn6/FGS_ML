@@ -5,23 +5,26 @@ import numpy as np
 import os
 import warnings
 warnings.filterwarnings("ignore") 
-import sys
+import sys 
+# Define the path you want to add
+path_to_add = r"C:\Users\barc\Dropbox (Weizmann Institute)\MSc_Weizmann\FGS_ML\ML_Project\pyScripts"
+# os.listdir(path_to_add)
+# Add the path to sys.path if it's not already there
+if path_to_add not in sys.path:
+    sys.path.append(path_to_add)
+from SeeTheData import SeeTheData
 
 # %%
-sys.path.append(r"C:\Users\barc\Dropbox (Weizmann Institute)\MSc_Weizmann\FGS_ML\ML_Project\pyScripts")
-from Main_EDA import SeeTheData
-# %%
-
 DirPath = os.getcwd()
 DataPath = os.path.join(DirPath,'AmesHousing.csv')
 df = pd.read_csv(DataPath) 
-display("df.describe:",df.describe())
-display("---------------------------")
-display("df.info:",(df.info()))
-display("---------------------------")
-display("df.head:",df.head())
-display("---------------------------")
-display("df.shape:",df.shape)
+# display("df.describe:",df.describe())
+# display("---------------------------")
+# display("df.info:",(df.info()))
+# display("---------------------------")
+# display("df.head:",df.head())
+# display("---------------------------")
+# display("df.shape:",df.shape)
 
 
 # %%
@@ -54,3 +57,9 @@ sns.countplot(housing[categorical]['MS Zoning'])
 housing[categorical]
 for i in housing[categorical]:
     sns.countplot(i)
+
+
+#%%
+a.Subsetting()
+# a.CountPlotOfObjectColumns()
+a.HistPlotOfNumericColumns()
