@@ -24,13 +24,14 @@ Maindf = pd.read_csv(PathToData)
 sns.set_style("darkgrid")
 plt.style.use("dark_background")
 
+# [func for func in dir(SeeTheData) if callable(getattr(SeeTheData, func))]
 
 #%%
 a= SeeTheData(Maindf)
 a.Subsetting()
 # a.Display()
-a.CountPlotOfObjectColumns()
-# a.HistPlotOfNumericColumns()
+# a.CountPlotOfObjectColumns()
+a.HistPlotOfNumericColumns()
 
 #%%
 df["discharge_disposition_id"][0:100]
