@@ -4,9 +4,14 @@ import seaborn as sns
 import numpy as np
 import os
 import warnings
-warnings.filterwarnings("ignore")
+warnings.filterwarnings("ignore") 
+import sys
 
 # %%
+sys.path.append(r"C:\Users\barc\Dropbox (Weizmann Institute)\MSc_Weizmann\FGS_ML\ML_Project\pyScripts")
+from Main_EDA import SeeTheData
+# %%
+
 DirPath = os.getcwd()
 DataPath = os.path.join(DirPath,'AmesHousing.csv')
 df = pd.read_csv(DataPath) 
@@ -21,8 +26,7 @@ display("df.shape:",df.shape)
 
 # %%
 data = df[["SalePrice","PID","Lot Frontage"]]
-data.dropna().head()
-df.columns
+data.dropna()
 
 # %%
 numerical = [
@@ -43,7 +47,7 @@ sns.set(style= "whitegrid", palette="pastel", font_scale=1.1,
 sns.distplot(housing['SalePrice'], norm_hist=False, kde=False, bins=20, hist_kws={"alpha": 1}
 ).set(xlabel='Sale Price', ylabel='Count');
 
-housing[numerical].hist(figsize=(15,15), bins= 20 , layout= (3,4));
+# housing[numerical].hist(figsize=(15,15), bins= 20 , layout= (3,4));
 # %%
 sns.countplot(housing[categorical]['MS Zoning'])
 # %%
