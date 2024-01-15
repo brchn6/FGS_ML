@@ -8,8 +8,18 @@ import matplotlib.pyplot as plt
 import warnings 
 warnings.filterwarnings("ignore")
 import sys 
+
+from sklearn.model_selection import StratifiedShuffleSplit
+from sklearn.model_selection import train_test_split
+
+
 pd.set_option("display.max_row", 100) #add a option of pd
 pd.set_option("display.max_columns", 100) #add a option of pd
+
+#display all data:
+def display_all(data):
+    with pd.option_context("display.max_row", 100, "display.max_columns", 100):
+        display(data)
 #%%
 # Define the path you want to add
 path_to_add = "/c/Users/barc/Dropbox (Weizmann Institute)/MSc_Weizmann/FGS_ML/ML_Project/pyScripts/"
@@ -29,36 +39,72 @@ PathToMap = os.path.join(GETCWD + "/.." + "\\diabetes+130-us+hospitals+for+years
 Maindf = pd.read_csv(PathToData)
 Mapdf = pd.read_csv(PathToMap)
 
-
 #sns + plt option and settings
 sns.set_style("darkgrid")
 plt.style.use("dark_background")
 
-#%%
-a= SeeTheData(Maindf)
-a.Subsetting()
-# a.Display()
+#%% SeeTheData script OOP will be use in the future
+# a= SeeTheData(df)
+# a.Subsetting()
+# # a.Display()
 # a.CountPlotOfObjectColumns()
 # a.HistPlotOfNumericColumns()
 #%%
-# Draw a combo histogram and scatterplot with density contours
-f, ax = plt.subplots(figsize=(6, 6))
-sns.scatterplot(x=x, y=y, s=5, color=".15")
-# sns.histplot(x=x, y=y, bins=50, pthresh=.1, cmap="mako")
-# sns.kdeplot(x=x, y=y, levels=5, color="w", linewidths=1)
-#%%
 df = Maindf
-#%%
 #Removing non-diabetes diagnosis should be before starting EDA
-test_df = df[df['diag_1'].str.contains('250') | df['diag_2'].str.contains('250') | df['diag_3'].str.contains('250')]
+Subset_df = df[df['diag_1'].str.contains('250') | df['diag_2'].str.contains('250') | df['diag_3'].str.contains('250')]
+df = Subset_df
+df.loc[df["readmitted"] == ">30" , "readmitted"] = "NO"
+df= df.reset_index(drop= True)
+#%%
+ColName= "readmitted"
+df["categoricalValue"] = df[ColName]
 
-# %%
-#display all data:
-def display_all(data):
-    with pd.option_context("display.max_row", 100, "display.max_columns", 100):
-        display(data)
-display_all(Mapdf)
+split = StratifiedShuffleSplit(n_splits=1, test_size=0.2, random_state=42)
+for train_index, test_index in split.split(df, df[ColName]):
+    strat_train_set = df.loc[train_index]
+    strat_test_set = df.loc[test_index]
 
+def Ratio_cat_proportions(data):
+    return data["categoricalValue"].value_counts() / len(data)
+
+train_set, test_set = train_test_split(df, test_size=0.2, random_state=42)
+
+#%%
+compare_props = pd.DataFrame({
+    "Overall": Ratio_cat_proportions(df),
+    "Stratified": Ratio_cat_proportions(strat_test_set),
+    "Random": Ratio_cat_proportions(test_set),
+}).sort_index()
+compare_props["Rand. %error"] = 100 * compare_props["Random"] / compare_props["Overall"] - 100
+compare_props["Strat. %error"] = 100 * compare_props["Stratified"] / compare_props["Overall"] - 100
+display(compare_props)
+
+f, ax = plt.subplots(figsize=(7, 5))
+sns.despine(f)
+sns.barplot(x=compare_props.index, y="Rand. %error", data=compare_props, palette='magma')
+f, ax = plt.subplots(figsize=(7, 5))
+sns.despine(f)
+sns.barplot(x=compare_props.index, y="Strat. %error", data=compare_props, palette='magma')
+
+#%%
+def drop_duplicates_fromDF(df,subset_col):
+    NumberOf_patient_nbr_substract= len(df) - len(df.drop_duplicates(subset=subset_col, keep="first"))
+    df= df.drop_duplicates(subset=subset_col, keep="first")
+    df= df.reset_index(drop=True)
+    return df , NumberOf_patient_nbr_substract
+
+df = drop_duplicates_fromDF(strat_train_set,"patient_nbr") [0]
+
+# print(len(Maindf.duplicated(subset="patient_nbr", keep='first')))
+# NumberOf_patient_nbr_substract= len(Maindf) - len(Maindf.drop_duplicates(subset='patient_nbr', keep="first"))
+# Maindf = Maindf.drop_duplicates(subset='patient_nbr', keep="first")
+
+#%%
+#this cell is for submitting the Expired and hospice patient from df
+discharge_disposition_id_DF = Mapdf[["discharge_disposition_id", "description.1"]]
+discharge_disposition_id_DF = discharge_disposition_id_DF[discharge_disposition_id_DF['description.1'].str.contains('Hospice') | discharge_disposition_id_DF['description.1'].str.contains('Expired')]
+df = df[~df['discharge_disposition_id'].isin(discharge_disposition_id_DF ['discharge_disposition_id'])]
 #%%
 display_all(df.info())
 
@@ -172,10 +218,9 @@ def convert_values(value):
     return value
 
 #%%
-df1 = df
 
 for col in diag_columns:
-    df1[col] = df[col].apply(convert_values)
+    df[col] = df[col].apply(convert_values)
 
 #%%
 
@@ -185,5 +230,75 @@ plt.figure(figsize=(15,8))
 ax = sns.countplot(x='value', hue='variable', data=df_melted)
 
 #%%
+listy= []
+listy.append(df1["diag_1"].value_counts()["Diabetes"])
+listy.append(df1["diag_2"].value_counts()["Diabetes"])
+listy.append(df1["diag_3"].value_counts()["Diabetes"])
 
-df
+sum(listy)
+
+#%%
+df['readmitted'].unique()
+
+#%%
+from sklearn.model_selection import train_test_split
+
+train_set, test_set = train_test_split(df, test_size=0.2, random_state=42)
+
+# %%
+fig, ax = plt.subplots(1,3,figsize = (10,8))
+
+ax[0].hist(df['insulin'])
+ax[1].hist(train_set['insulin'])
+ax[2].hist(test_set['insulin'])
+
+# %%
+def income_cat_proportions(data):
+    return data["income_cat"].value_counts() / len(data)
+
+train_set, test_set = train_test_split(housing, test_size=0.2, random_state=42)
+
+compare_props = pd.DataFrame({
+    "Overall": income_cat_proportions(housing),
+    "Stratified": income_cat_proportions(strat_test_set),
+    "Random": income_cat_proportions(test_set),
+}).sort_index()
+compare_props["Rand. %error"] = 100 * compare_props["Random"] / compare_props["Overall"] - 100
+compare_props["Strat. %error"] = 100 * compare_props["Stratified"] / compare_props["Overall"] - 100
+#%%
+df['A1Cresult'].unique()
+
+
+##We considered four groups of encounters: (1) no HbA1c
+#est performed, (2) HbA1c performed and in normal range,
+#(3) HbA1c performed and the result is greater than 8%
+#with no change in diabetic medications, and (4) HbA1c
+#performed, result is greater than 8%, and diabetic medication
+##was changed.
+
+df.columns
+df['change'].unique()
+
+
+# %%
+cond1 = df['A1Cresult'] == 'None'
+cond2 = (df['A1Cresult'] == 'Norm')
+cond3 = (df['A1Cresult'] == '>7') & (df['change'] == "No")
+cond4 = (df['A1Cresult'] == '>7') & (df['change'] == "Ch")
+cond5 = (df['A1Cresult'] == '>8') & (df['change'] == "No")
+cond6 = (df['A1Cresult'] == '>8') & (df['change'] == "Ch")
+# %%
+
+
+
+# %%
+df.loc[cond1, 'A1Cresult'] = 'No HbA1c test performed'
+df.loc[cond2, 'A1Cresult'] = 'HbA1c in normal range'
+df.loc[cond3, 'A1Cresult'] = 'HbA1c greater than 7%, but no med change'
+df.loc[cond4, 'A1Cresult'] = 'HbA1c greater than 7%, with med change'
+df.loc[cond5, 'A1Cresult'] = 'HbA1c greater than 8%, but no med change'
+df.loc[cond6, 'A1Cresult'] = 'HbA1c greater than 8%, with med change'
+# %%
+df['A1Cresult'].unique()
+
+# %%
